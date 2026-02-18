@@ -1,5 +1,6 @@
+# auth.py
 import streamlit as st
-from login import login_screen
+from login_view import login_screen   # 👈 antes era from login import ...
 from utils import apply_base_ui
 
 def require_login():
@@ -7,13 +8,14 @@ def require_login():
         st.session_state.auth = None
 
     if st.session_state.auth is None:
-        apply_base_ui(hide_nav=True)   # ✅ ocultar menú multipágina en login
-        login_screen()
-        st.stop()
+        st.switch_page("pages/login.py")
+
+# (lo demás igual)
 
 def require_roles(*roles):
     user = st.session_state.get("auth") or {}
     rol = user.get("rol", "CONSULTA")
+
     if rol not in roles:
         st.error("⛔ No tienes permisos para ver esta sección.")
         st.stop()
