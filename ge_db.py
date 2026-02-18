@@ -68,7 +68,7 @@ def listar_usuarios():
     try:
         with conn.cursor() as cur:
             cur.execute("""
-                SELECT u.id, u.username, u.nombre, u.activo, r.nombre AS rol
+                SELECT u.id, u.usuario, u.nombre, u.activo, r.nombre AS rol
                 FROM usuarios u
                 JOIN roles r ON r.id = u.rol_id
                 ORDER BY u.id DESC
@@ -76,6 +76,7 @@ def listar_usuarios():
             return cur.fetchall()
     finally:
         conn.close()
+
 
 def crear_usuario(username, nombre, password_hash, rol_id, activo=1):
     conn = get_connection()
@@ -247,28 +248,52 @@ def listar_clientes():
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, nombre FROM clientes ORDER BY nombre")
+            cursor.execute("""
+                SELECT 
+                    id_cli AS id,
+                    nombre_cli AS nombre
+                FROM clientes
+                WHERE status_cli = 'HABILITADO'
+                ORDER BY nombre_cli
+            """)
             return cursor.fetchall()
     finally:
         conn.close()
+
+
 
 def listar_empresas():
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, nombre FROM empresas ORDER BY nombre")
+            cursor.execute("""
+                SELECT id_emp AS id,
+                       nombre_emp AS nombre
+                FROM empresas
+                WHERE status_emp = 'HABILITADO'
+                ORDER BY nombre_emp
+            """)
             return cursor.fetchall()
     finally:
         conn.close()
+
 
 def listar_bancos():
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, nombre FROM bancos ORDER BY nombre")
+            cursor.execute("""
+                SELECT id_ban AS id,
+                       nombre_ban AS nombre
+                FROM bancos
+                WHERE status_ban = 'HABILITADO'
+                   OR status_ban IS NULL
+                ORDER BY nombre_ban
+            """)
             return cursor.fetchall()
     finally:
         conn.close()
+
         
 def debug_server_info():
     conn = pymysql.connect(
@@ -382,3 +407,23 @@ def autenticar(username, password):
 
     finally:
         conn.close()
+
+def listar_cuentas_activas():
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    id_cue AS id,
+                    nombre_cue AS nombre,
+                    tipo_cue
+                FROM cuentas
+                WHERE (status_cue = 'HABILITADO' OR status_cue IS NULL)
+                  AND tipo_cue IN ('EGRESO', 'GASTO')
+                ORDER BY nombre_cue
+            """)
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
+
